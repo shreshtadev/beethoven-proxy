@@ -37,13 +37,13 @@ const proxy = createProxyMiddleware({
 Bun.serve({
     fetch: (req, server) => {
         // Set CORS headers
-        server.headers('Access-Control-Allow-Origin', '*');
-        server.headers('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-        server.headers('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+        server.header('Access-Control-Allow-Origin', '*');
+        server.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+        server.header('Access-Control-Allow-Headers', 'Authorization, Content-Type');
 
         // Handle preflight requests
         if (req.method === 'OPTIONS') {
-            server.headers('Access-Control-Max-Age', '1728000');
+            server.header('Access-Control-Max-Age', '1728000');
             return new Response(null, {
                 status: 204,
             });
@@ -55,7 +55,7 @@ Bun.serve({
                 writeHead: (status, headers) => {
                     server.status(status);
                     for (const key in headers) {
-                        server.headers(key, headers[key]);
+                        server.header(key, headers[key]);
                     }
                 },
                 end: (data) => {
@@ -66,15 +66,15 @@ Bun.serve({
                 },
                 //  Required for http-proxy-middleware
                 setHeader: (name, value) => {
-                    server.headers(name, value);
+                    server.header(name, value);
                 },
                 // Required for http-proxy-middleware
                 getHeader: (name) => {
-                    return server.headers(name);
+                    return server.header(name);
                 },
                  // Required for http-proxy-middleware
                 removeHeader: (name) => {
-                    server.headers(name, undefined);
+                    server.header(name, undefined);
                 }
             };
             //  Call the proxy middleware
