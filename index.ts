@@ -37,15 +37,19 @@ const proxy = createProxyMiddleware({
 Bun.serve({
     fetch: (req, server) => {
         // Set CORS headers
-        server.header('Access-Control-Allow-Origin', '*');
-        server.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-        server.header('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+        const headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+        }
+
 
         // Handle preflight requests
         if (req.method === 'OPTIONS') {
             server.header('Access-Control-Max-Age', '1728000');
             return new Response(null, {
                 status: 204,
+                headers: headers,
             });
         }
 
