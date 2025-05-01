@@ -1,5 +1,6 @@
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import { parse } from 'url';
+import { Readable } from 'stream'; // Import the Readable stream
 
 // Configuration
 const pocketbaseUrl = 'http://localhost:8090';
@@ -35,7 +36,7 @@ const proxy = createProxyMiddleware({
 
 // Create Bun server
 Bun.serve({
-    fetch: (req, server) => {
+    fetch: async (req, server) => { // Make fetch async to use await
         // Set CORS headers
         const headers = {
             'Access-Control-Allow-Origin': '*',
@@ -52,6 +53,60 @@ Bun.serve({
             });
         }
 
+        // Adapt Bun's request to be more Node.js-like for http-proxy-middleware
+        const nodeReq = {
+            ...req, // Spread the original Bun request
+            method: req.method,
+            url: req.url,
+            headers: Object.fromEntries(req.headers.entries()), // Convert Headers to object
+            connection: {
+                remoteAddress: req.remoteAddress?.hostname || '127.0.0.1', // Get remote address
+            },
+            //  Implement the req.on() method, which is used by http-proxy-middleware
+            on: (event, callback) => {
+                if (event === 'data') {
+                    if (req.body) {
+                        //  Get the body as a ReadableStream if it exists
+                        (async () => {
+                            const reader = req.body.getReader();
+                            const stream = new Readable({
+                                async read() {
+                                    const { done, value } = await reader.read();
+                                    if (done) {
+                                        this.push(null); // Signal end of stream
+                                    } else {
+                                        this.push(Buffer.from(value)); // Push data as Buffer
+                                    }
+                                },
+                            });
+                            // Emit data event with the ReadableStream
+                            callback(stream);
+                        })();
+                    }
+                } else if (event === 'end') {
+                    //  If there is no body, emit the end event.
+                    if (!req.body) {
+                         callback();
+                    } else {
+                        // Wait for the body to be fully read, THEN emit 'end'
+                        (async () => {
+                            if (req.body) {
+                                for await (const _ of req.body) {
+                                    // Consume the body
+                                }
+                            }
+                            callback();
+                        })();
+                    }
+                } else if (event === 'error') {
+                    // Handle errors, though Bun's fetch API generally throws errors
+                    //  which are caught by the try-catch.
+                }
+                //  For other events, you might need to add more logic.
+                return req; // Chainable
+            },
+        };
+
         //  Use the proxy.  Adapt Bun's request/response to Node's.
         return new Promise((resolve, reject) => {
             let responseData; // Store the response data
@@ -65,7 +120,7 @@ Bun.serve({
                 },
                 end: (data) => {
                     responseData = data; // Store data
-                    const response = new Response(responseData, { // Use stored data
+                     const response = new Response(responseData, { // Use stored data
                         headers: Object.fromEntries(server.headers),
                     });
                     resolve(response); // Resolve with the constructed Response
@@ -84,7 +139,7 @@ Bun.serve({
                 }
             };
             //  Call the proxy middleware
-            proxy(req, nodeRes, (err) => {
+            proxy(nodeReq, nodeRes, (err) => { // Use the adapted nodeReq
                 if (err) {
                     console.error("Error during proxying:", err);
                     const errorResponse = new Response(`Internal Server Error: ${err.message}`, { status: 500 });
