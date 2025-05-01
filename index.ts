@@ -11,7 +11,7 @@ const proxy = createProxyMiddleware({
     //  No target here.  We'll decide dynamically in the router.
     changeOrigin: true,
     ws: true,  // Enable for WebSockets if needed
-    logLevel: 'info', // Adjust as needed: 'debug', 'info', 'warn', 'error'
+    logLevel: 'info', // Adjust as needed: 'debug', 'info', 'warn', or 'error'
     onError: (err, req, res) => {
         console.error('Proxy Error:', err);
         res.writeHead(500, { 'Content-Type': 'text/plain' });
@@ -41,32 +41,34 @@ Bun.serve({
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
             'Access-Control-Allow-Headers': 'Authorization, Content-Type',
-        }
-
+        };
 
         // Handle preflight requests
         if (req.method === 'OPTIONS') {
-            server.header('Access-Control-Max-Age', '1728000');
+            headers['Access-Control-Max-Age'] = '1728000';
             return new Response(null, {
                 status: 204,
-                headers: headers,
+                headers: headers, // Pass headers in the constructor
             });
         }
 
         //  Use the proxy.  Adapt Bun's request/response to Node's.
         return new Promise((resolve, reject) => {
+            let responseData; // Store the response data
             const nodeRes = {  //  Minimal Node.js response object
                 writeHead: (status, headers) => {
                     server.status(status);
                     for (const key in headers) {
+                        //  This is where we set the headers on the Bun response
                         server.header(key, headers[key]);
                     }
                 },
                 end: (data) => {
-                    if (data) {
-                        server.write(data);
-                    }
-                    resolve(new Response()); // Resolve the Promise
+                    responseData = data; // Store data
+                    const response = new Response(responseData, { // Use stored data
+                        headers: Object.fromEntries(server.headers),
+                    });
+                    resolve(response); // Resolve with the constructed Response
                 },
                 //  Required for http-proxy-middleware
                 setHeader: (name, value) => {
@@ -76,7 +78,7 @@ Bun.serve({
                 getHeader: (name) => {
                     return server.header(name);
                 },
-                 // Required for http-proxy-middleware
+                // Required for http-proxy-middleware
                 removeHeader: (name) => {
                     server.header(name, undefined);
                 }
@@ -85,15 +87,14 @@ Bun.serve({
             proxy(req, nodeRes, (err) => {
                 if (err) {
                     console.error("Error during proxying:", err);
-                    server.write(new Response(`Internal Server Error: ${err.message}`, { status: 500 }));
-                    resolve(new Response());
+                    const errorResponse = new Response(`Internal Server Error: ${err.message}`, { status: 500 });
+                    resolve(errorResponse);
                 }
             });
         });
     },
     port: proxyPort,
 });
-
 
 console.log(`Proxy server listening on port ${proxyPort}`);
 console.log(`Proxying:`);
