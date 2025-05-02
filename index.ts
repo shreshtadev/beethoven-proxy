@@ -27,13 +27,6 @@ app.use((req, res, next) => {
 
 // Proxy routes
 app.use(
-    '/pb',
-    createProxyMiddleware({
-        target: `${pocketbaseUrl}`,
-        changeOrigin: true,
-    })
-);
-app.use(
     '/api',
     createProxyMiddleware({
         target: `${pocketbaseUrl}/api`,
