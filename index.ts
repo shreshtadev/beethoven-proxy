@@ -2,7 +2,8 @@ const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 // Configuration
-const svelteUrl = 'http://localhost:3000';
+const pocketbaseUrl = "http://3.109.250.92:8090";
+const svelteUrl = 'http://13.232.178.86:3000';
 const proxyPort = 9080;
 
 // Create Express app
@@ -25,6 +26,13 @@ app.use((req, res, next) => {
 });
 
 // Proxy routes
+app.use(
+    ['/api', '/_/'],
+    createProxyMiddleware({
+        target: pocketbaseUrl,
+        changeOrigin: true,
+    })
+);
 app.use(
     '/',
     createProxyMiddleware({
