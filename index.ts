@@ -2,7 +2,6 @@ const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 // Configuration
-const pocketbaseUrl = 'http://3.109.250.92:8090';
 const svelteUrl = 'http://localhost:3000';
 const proxyPort = 9080;
 
@@ -11,7 +10,7 @@ const app = express();
 
 // Set CORS headers
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000,http://3.109.250.92:8090');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
@@ -27,14 +26,6 @@ app.use((req, res, next) => {
 
 // Proxy routes
 app.use(
-    ['/api', '/_/'],
-    createProxyMiddleware({
-        target: pocketbaseUrl,
-        changeOrigin: true,
-    })
-);
-
-app.use(
     '/',
     createProxyMiddleware({
         target: svelteUrl,
@@ -46,7 +37,5 @@ app.use(
 app.listen(proxyPort, () => {
     console.log(`Proxy server listening on port ${proxyPort}`);
     console.log(`Proxying:`);
-    console.log(`  /api  => ${pocketbaseUrl}`);
-    console.log(`  /_/   => ${pocketbaseUrl}`);
-    console.log(`  Other => ${svelteUrl}`);
+    console.log(`  FE => ${svelteUrl}`);
 });
