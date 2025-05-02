@@ -2,7 +2,7 @@ const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 // Configuration
-const pocketbaseUrl = "http://3.109.250.92:8090";
+const pocketbaseUrl = "http://13.232.178.86:8090";
 const svelteUrl = 'http://13.232.178.86:3000';
 const proxyPort = 9080;
 
@@ -11,7 +11,7 @@ const app = express();
 
 // Set CORS headers
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', 'http://13.232.178.86:3000');
+    res.setHeader('Access-Control-Allow-Origin', 'http://13.232.178.86:3000,http://127.0.0.1:3000');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', '*, Authorization, Content-Type');
