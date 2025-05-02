@@ -1,37 +1,46 @@
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
-const app = express();
 
 // Configuration
-const pocketbaseUrl = 'http://localhost:8090';
+const pocketbaseUrl = 'http://3.109.250.92:8090';
 const svelteUrl = 'http://localhost:3000';
 const proxyPort = 9080;
 
-// Proxy middleware
-const proxy = createProxyMiddleware({
-    router: {
-        '/api': pocketbaseUrl,
-        '/_/': pocketbaseUrl,
-        '/': svelteUrl,  //  This catches all other requests and sends them to svelte
-    },
-    changeOrigin: true,
-    ws: true,
-    logLevel: 'info',
-    onProxyRes: function (proxyRes, req, res) {
-        // Set CORS headers
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
-        if (req.method === 'OPTIONS') {
-           res.setHeader('Access-Control-Max-Age', '1728000');
-           res.writeHead(204);
-           res.end();
-        }
+// Create Express app
+const app = express();
+
+// Set CORS headers
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000,http://3.109.250.92:8090');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+        res.setHeader('Access-Control-Max-Age', '1728000');
+        return res.sendStatus(200);
     }
+
+    next();
 });
 
-// Use the proxy middleware
-app.use('/', proxy);
+// Proxy routes
+app.use(
+    ['/api', '/_/'],
+    createProxyMiddleware({
+        target: pocketbaseUrl,
+        changeOrigin: true,
+    })
+);
+
+app.use(
+    '/',
+    createProxyMiddleware({
+        target: svelteUrl,
+        changeOrigin: true,
+    })
+);
 
 // Start the server
 app.listen(proxyPort, () => {
