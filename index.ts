@@ -1,7 +1,7 @@
 const express = require('express');
 const compression = require('compression');
 // const cors = require('cors');
-const { createProxyMiddleware, fixRequestBody } = require('http-proxy-middleware');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 // Configuration
 const pocketbaseUrl = "http://127.0.0.1:8090";
