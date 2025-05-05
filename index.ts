@@ -18,6 +18,7 @@ app.use(compression());
 // Set CORS headers
 const allowedOrigins = [
     'http://13.232.178.86:3000',
+    'http://13.232.178.86:9080',
     'http://127.0.0.1:3000',
     'http://localhost:3000',
     'http://127.0.0.1:8090',
