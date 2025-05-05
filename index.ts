@@ -4,8 +4,8 @@ const compression = require('compression');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 // Configuration
-const pocketbaseUrl = "http://127.0.0.1:8090";
-const svelteUrl = 'http://localhost:3000';
+const pocketbaseUrl = "http://13.232.178.86:8090";
+const svelteUrl = 'http://13.232.178.86:3000';
 const proxyPort = 9080;
 
 // Create Express app
@@ -16,20 +16,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(compression());
 // app.use(cors());
 // Set CORS headers
-const allowedOrigins = [
-    'http://13.232.178.86:3000',
-    'http://13.232.178.86:9080',
-    'http://127.0.0.1:3000',
-    'http://localhost:3000',
-    'http://127.0.0.1:8090',
-    'http://localhost:8090',
-    'http://localhost:9080',
-];
 app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-    }
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
