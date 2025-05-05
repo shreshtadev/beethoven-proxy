@@ -12,8 +12,8 @@ const proxyHost = '0.0.0.0';
 // Create Express app
 const app = express();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
 app.use(compression());
 // app.use(cors());
 // Set CORS headers
