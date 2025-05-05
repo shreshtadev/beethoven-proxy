@@ -1,15 +1,20 @@
 {
-  "name": "beethoven-proxy",
-  "module": "index.ts",
-  "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "express": "^5.1.0",
-    "http-proxy-middleware": "^3.0.5"
-  }
+	"name": "beethoven-proxy",
+	"module": "index.ts",
+	"type": "module",
+	"devDependencies": {
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"dependencies": {
+		"compression": "^1.8.0",
+		"cors": "^2.8.5",
+		"express": "^5.1.0",
+		"http-proxy-middleware": "^3.0.5"
+	},
+	"scripts": {
+		"start": "bun run index.ts"
+	}
 }
