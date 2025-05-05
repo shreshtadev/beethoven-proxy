@@ -7,6 +7,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const pocketbaseUrl = "http://13.232.178.86:8090";
 const svelteUrl = 'http://13.232.178.86:3000';
 const proxyPort = 9080;
+const proxyHost = '0.0.0.0';
 
 // Create Express app
 const app = express();
@@ -57,7 +58,7 @@ app.use(
 );
 
 // Start the server
-app.listen(proxyPort, () => {
+app.listen(proxyPort, proxyHost, () => {
     console.log(`Proxy server listening on port ${proxyPort}`);
     console.log(`Proxying:`);
     console.log(`  FE => ${svelteUrl}`);
