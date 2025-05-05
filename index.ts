@@ -47,7 +47,6 @@ app.use((req, res, next) => {
 app.use('/api',  createProxyMiddleware({
         target: pocketbaseUrl+'/api',
         changeOrigin: true,
-        onProxyReq: (proxyReq, req, res) => fixRequestBody(proxyReq, req),
         logLevel: 'debug',
     })
 );
@@ -56,7 +55,6 @@ app.use('/_/',
     createProxyMiddleware({
         target: pocketbaseUrl+'/_/',
         changeOrigin: true,
-        onProxyReq: (proxyReq, req, res) => fixRequestBody(proxyReq, req),
         logLevel: 'debug',
 
     })
@@ -66,7 +64,6 @@ app.use(
     createProxyMiddleware({
         target: svelteUrl,
         changeOrigin: true,
-        onProxyReq: (proxyReq, req, res) => fixRequestBody(proxyReq, req),
         logLevel: 'debug',
     })
 );
